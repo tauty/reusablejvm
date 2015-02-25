@@ -46,6 +46,7 @@ public class ReusableJVM {
                         try {
                             printStream.flush();
                             baos.writeTo(STDOUT);
+                            baos.reset();
                         } catch (IOException e) {
                             throw new IORuntimeException(e);
                         }
@@ -67,7 +68,7 @@ public class ReusableJVM {
             Class clazz = Class.forName(className);
             Method main = clazz.getMethod("main", new Class[]{String[].class});
             main.invoke(null, new Object[]{toStringArray(list)});
-        } else if (commandName.equals("output")) {
+        } else if (commandName.equals("sysout")) {
             stdoutTransfer.run();
         } else {
             throw new UnsupportedOperationException(commandName + " is not supported. Check the usage.");
