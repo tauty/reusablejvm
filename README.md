@@ -1,2 +1,3 @@
 # reusablejvm
-enable to perform your main method without invoking java command every time
+enable you to perform your main methods of java without invoking JVM every time.
+
