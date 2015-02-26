@@ -30,6 +30,7 @@ foreach ( 1 .. 100 ) {
         }
     }
 }
+print WRITE "exit\n";
 
 close(WRITE);
 close(READ);

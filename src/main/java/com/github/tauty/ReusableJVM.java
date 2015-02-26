@@ -65,7 +65,8 @@ public class ReusableJVM {
             } catch (Throwable t) {
                 STDOUT.println(t instanceof Exception ? "EXCEPTION" : "ERROR");
                 t.printStackTrace();
-                System.err.println("\n###END###");
+                System.err.println();
+                System.err.println("###END###");
             }
         }
     }
@@ -75,15 +76,6 @@ public class ReusableJVM {
         Class clazz = Class.forName(className);
         Method main = clazz.getMethod("main", new Class[]{String[].class});
         main.invoke(null, new Object[]{toStringArray(list)});
-    }
-
-    static void exec(String commandName, Runnable stdoutTransfer) throws Exception {
-        if (commandName.equals("java")) {
-        } else if (commandName.equals("sysout")) {
-            stdoutTransfer.run();
-        } else {
-            throw new UnsupportedOperationException(commandName + " is not supported. Check the usage.");
-        }
     }
 
     private static final Pattern DELIM_PTN = Pattern.compile("(\\s+|$|\\\")");
