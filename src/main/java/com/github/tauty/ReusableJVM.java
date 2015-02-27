@@ -90,7 +90,7 @@ public class ReusableJVM {
         while (dm.find(pos)) {
             if (dm.group().equals("\"")) {
                 if (qm.find(dm.end())) {
-                    list.add(decodeEcaped(qm.group(1)));
+                    list.add(decodeEscaped(qm.group(1)));
                     pos = qm.end();
                 } else {
                     throw new DoubleQuotationUnmatchException(s);
@@ -113,7 +113,7 @@ public class ReusableJVM {
         return result;
     }
 
-    private static String decodeEcaped(String s) {
+    private static String decodeEscaped(String s) {
         return s.replaceAll("\\\\r", "\r").replaceAll("\\\\n", "\n")
                 .replaceAll("\\\\t", "\t").replaceAll("\\\\\"", "\"");
     }
