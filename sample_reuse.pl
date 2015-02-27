@@ -14,15 +14,14 @@ foreach ( 1 .. 100 ) {
 
     # 結果判定
     my $status = <READ>;
-    chomp($status); 
-    if($status eq 'SUCCESS') {
+    if($status =~ /^SUCCESS/) {
         # コマンドの標準出力からデータを読み出す
         print WRITE "sysout\n";
         my $s = <READ>;
         print "$_ -> $s";
     } else {
         # ERROR出力
-        print "input:$_, result:$status\n";
+        print "input:$_, result:$status";
         print WRITE "syserr\n";
         while( <READ> ) {
             last if $_ =~ /^###END###/;
