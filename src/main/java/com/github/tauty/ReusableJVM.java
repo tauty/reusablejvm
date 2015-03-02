@@ -47,7 +47,7 @@ public class ReusableJVM {
                 LinkedList list = parseArgs(line);
                 String commandName = (String) list.removeFirst();
                 if (commandName.equals("java")) {
-                    invokeMain(commandName, list);
+                    invokeMain(list);
                     STDOUT.println("SUCCESS");
                 } else if (commandName.equals("sysout")) {
                     sysout.flush();
@@ -71,13 +71,6 @@ public class ReusableJVM {
         }
     }
 
-    static void invokeMain(String commandName, LinkedList list) throws Exception {
-        String className = (String) list.removeFirst();
-        Class clazz = Class.forName(className);
-        Method main = clazz.getMethod("main", new Class[]{String[].class});
-        main.invoke(null, new Object[]{toStringArray(list)});
-    }
-
     private static final Pattern DELIM_PTN = Pattern.compile("(\\s+|$|\\\")");
     private static final Pattern QUOTE_PTN = Pattern.compile("((\\\\\"|[^\"])*)\"\\s*");
 
@@ -97,12 +90,28 @@ public class ReusableJVM {
                 }
             } else {
                 String param = s.substring(pos, dm.start());
-                if (param == null || param.equals("")) break;
+                if (isEmpty(param)) break;
                 list.add(param);
                 pos = dm.end();
             }
         }
         return list;
+    }
+
+    private static String decodeEscaped(String s) {
+        return s.replaceAll("\\\\r", "\r").replaceAll("\\\\n", "\n")
+                .replaceAll("\\\\t", "\t").replaceAll("\\\\\"", "\"");
+    }
+
+    private static boolean isEmpty(String value) {
+        return value == null || value.length() == 0;
+    }
+
+    static void invokeMain(LinkedList list) throws Exception {
+        String className = (String) list.removeFirst();
+        Class clazz = Class.forName(className);
+        Method main = clazz.getMethod("main", new Class[]{String[].class});
+        main.invoke(null, new Object[]{toStringArray(list)});
     }
 
     private static String[] toStringArray(List list) {
@@ -111,11 +120,6 @@ public class ReusableJVM {
             result[i] = (String) list.get(i);
         }
         return result;
-    }
-
-    private static String decodeEscaped(String s) {
-        return s.replaceAll("\\\\r", "\r").replaceAll("\\\\n", "\n")
-                .replaceAll("\\\\t", "\t").replaceAll("\\\\\"", "\"");
     }
 
     public static class DoubleQuotationUnmatchException extends Exception {

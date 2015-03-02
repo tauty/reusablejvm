@@ -21,8 +21,8 @@
 				<configuration>
 					<source>1.4</source>
 					<target>1.4</target>
-					<testSource>1.5</testSource>
-					<testTarget>1.5</testTarget>
+					<testSource>1.6</testSource>
+					<testTarget>1.6</testTarget>
 				</configuration>
 			</plugin>
 			<plugin>
