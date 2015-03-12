@@ -18,7 +18,6 @@ package com.github.tauty;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +26,16 @@ import java.util.regex.Pattern;
  */
 public class ReusableJVM {
 
+    private static String END_TOKEN = "###END###";
+
     public static void main(String[] args) throws IOException {
+        for (int i=0; i<args.length; i++) {
+            String arg = args[i];
+            if(arg.startsWith("end_token=")) {
+                END_TOKEN = arg.substring(arg.indexOf('=') + 1);
+            }
+        }
+
         // backup
         final PrintStream STDOUT = System.out;
 
@@ -50,13 +58,9 @@ public class ReusableJVM {
                     invokeMain(list);
                     STDOUT.println("SUCCESS");
                 } else if (commandName.equals("sysout")) {
-                    sysout.flush();
-                    outBaos.writeTo(STDOUT);
-                    outBaos.reset();
+                    flushBaos(STDOUT, outBaos, sysout);
                 } else if (commandName.equals("syserr")) {
-                    syserr.flush();
-                    errBaos.writeTo(STDOUT);
-                    errBaos.reset();
+                    flushBaos(STDOUT, errBaos, syserr);
                 } else if (commandName.equals("exit")) {
                     return;
                 } else {
@@ -66,7 +70,6 @@ public class ReusableJVM {
                 STDOUT.println(t instanceof Exception ? "EXCEPTION" : "ERROR");
                 t.printStackTrace();
                 System.err.println();
-                System.err.println("###END###");
             }
         }
     }
@@ -83,7 +86,7 @@ public class ReusableJVM {
         while (dm.find(pos)) {
             if (dm.group().equals("\"")) {
                 if (qm.find(dm.end())) {
-                    list.add(decodeEscaped(qm.group(1)));
+                    list.add(unescape(qm.group(1)));
                     pos = qm.end();
                 } else {
                     throw new DoubleQuotationUnmatchException(s);
@@ -98,7 +101,14 @@ public class ReusableJVM {
         return list;
     }
 
-    private static String decodeEscaped(String s) {
+    private static void flushBaos(PrintStream STDOUT, ByteArrayOutputStream baos, PrintStream printStream) throws IOException {
+        printStream.flush();
+        baos.writeTo(STDOUT);
+        baos.reset();
+        STDOUT.println(END_TOKEN);
+    }
+
+    private static String unescape(String s) {
         return s.replaceAll("\\\\r", "\r").replaceAll("\\\\n", "\n")
                 .replaceAll("\\\\t", "\t").replaceAll("\\\\\"", "\"");
     }
@@ -111,15 +121,7 @@ public class ReusableJVM {
         String className = (String) list.removeFirst();
         Class clazz = Class.forName(className);
         Method main = clazz.getMethod("main", new Class[]{String[].class});
-        main.invoke(null, new Object[]{toStringArray(list)});
-    }
-
-    private static String[] toStringArray(List list) {
-        String[] result = new String[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            result[i] = (String) list.get(i);
-        }
-        return result;
+        main.invoke(null, new Object[]{list.toArray(new String[]{})});
     }
 
     public static class DoubleQuotationUnmatchException extends Exception {

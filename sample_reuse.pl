@@ -19,6 +19,7 @@ foreach ( 1 .. 100 ) {
         print WRITE "sysout\n";
         my $s = <READ>;
         print "$_ -> $s";
+        <READ>; # skip the end token.
     } else {
         # ERROR出力
         print "input:$_, result:$status";
