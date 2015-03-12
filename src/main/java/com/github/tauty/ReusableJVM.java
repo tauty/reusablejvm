@@ -29,9 +29,9 @@ public class ReusableJVM {
     private static String END_TOKEN = "###END###";
 
     public static void main(String[] args) throws IOException {
-        for (int i=0; i<args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             String arg = args[i];
-            if(arg.startsWith("end_token=")) {
+            if (arg.startsWith("end_token=")) {
                 END_TOKEN = arg.substring(arg.indexOf('=') + 1);
             }
         }
